@@ -1,0 +1,15 @@
+/.Module.symvers.cmd
+/.kernel_module.ko.cmd
+/.kernel_module.mod.cmd
+/.kernel_module.mod.o.cmd
+/.kernel_module.o.cmd
+/.modules.order.cmd
+/.vscode
+/Module.symvers
+/OS Basic Version of Project Deliverables.pdf
+/kernel_module.ko
+/kernel_module.mod
+/kernel_module.mod.c
+/kernel_module.mod.o
+/kernel_module.o
+/modules.order
