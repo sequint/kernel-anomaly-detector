@@ -91,5 +91,5 @@ This will serve as a static guide of the project roadmap.  GitHub issues will be
 
 ## Authors
 
-[Steven Quintana](https://github.com/sequint)
-[Mason Wilson IV]
+- [Steven Quintana](https://github.com/sequint)
+- Mason Wilson IV
