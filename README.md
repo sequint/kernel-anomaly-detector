@@ -28,6 +28,7 @@ A kernel module for monitoring system processes and detecting anomalies as poten
    ```bash
    sudo apt update
    sudo apt install linux-headers-$(uname -r)
+   sudo apt install make
    ```
 
 If using VSCode, intellisense may produce red underline errors in the #inlude statements.
