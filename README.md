@@ -27,28 +27,10 @@ A kernel module for monitoring system processes and detecting anomalies as poten
 2. Open a bash terminal and follow the following commands to install linux headers:
    ```bash
    sudo apt update
+   sudo apt install gcc
    sudo apt install linux-headers-$(uname -r)
    sudo apt install make
    ```
-
-If using VSCode, intellisense may produce red underline errors in the #inlude statements.
-Below are steps to remedy:
-
-1. In VSCode type Ctrl/Shift/P
-2. In the search bar search for 'C/C++: Edit Configurations (UI)'
-3. Click on 'c_cpp_properties.json' on the left hand side
-4. Edit indludePath to have the following paths (replace (uname -r) with system uname, can be found by type 'uname -r' into the terminal):
-
-            "includePath": [
-                "${workspaceFolder}/**",
-                "/usr/src/linux-headers-(uname -r)/include",
-                "/usr/src/linux-headers-(uname -r)/include/uapi",
-                "/usr/src/linux-headers-(uname -r)/arch/x86/include",
-                "/usr/include",
-                "/usr/src/linux-headers-(uname -r)/arch/x86/include/generated"
-            ]
-
-If the red lines still appear, they should be fixed after a succesful build.
 
 ## Build
 
