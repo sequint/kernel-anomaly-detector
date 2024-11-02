@@ -11,7 +11,7 @@
 
 - [About](#About)
 - [Installation](#Installation)
-- [Build/Run](#Build/Run)
+- [Build](#Build)
 - [Roadmap](#Roadmap)
 - [Authors](#Authors)
 
@@ -50,7 +50,7 @@ Below are steps to remedy:
 
 If the red lines still appear, they should be fixed after a succesful build.
 
-## Build/Run
+## Build
 
 ```bash
 # Navigate to the directory you cloned the module into
