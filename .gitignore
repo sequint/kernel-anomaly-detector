@@ -4,7 +4,6 @@
 /.kernel_module.mod.o.cmd
 /.kernel_module.o.cmd
 /.modules.order.cmd
-/.vscode
 /Module.symvers
 /OS Basic Version of Project Deliverables.pdf
 /kernel_module.ko

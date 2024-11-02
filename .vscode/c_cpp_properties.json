@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/src/linux-headers-6.8.0-41-generic/include",
+                "/usr/src/linux-headers-6.8.0-41-generic/include/uapi",
+                "/usr/src/linux-headers-6.8.0-41-generic/arch/x86/include",
+                "/usr/include",
+                "/usr/src/linux-headers-6.8.0-41-generic/arch/x86/include/generated"
+            ],
+            "defines": [
+                "__KERNEL__",
+                "MODULE"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "compilerPath": "/usr/bin/gcc",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.makefile-tools"
+        }
+    ],
+    "version": 4
+}
