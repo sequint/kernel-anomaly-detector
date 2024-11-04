@@ -12,3 +12,4 @@
 /kernel_module.mod.o
 /kernel_module.o
 /modules.order
+/.vscode
