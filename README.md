@@ -32,6 +32,12 @@ A kernel module for monitoring system processes and detecting anomalies as poten
    sudo apt install make
    ```
 
+### VSCode c_cpp properties
+
+c_cpp_properties.json file has been included for use in VSCode IDE.  If you are not using Code for development, delete this directory.
+If using Code, in a Bash shell enter the command 'uname -r' after installing the above packages.
+Copy the result and replace the (uname -r) portions of the json file with the value.
+
 ## Build
 
 ```bash
