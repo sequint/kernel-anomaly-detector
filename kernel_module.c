@@ -4,6 +4,8 @@
 #include <linux/init.h>
 #include <linux/seq_file.h>
 #include <linux/mm.h>
+#include <linux/ktime.h>
+#include <linux/timekeeping.h>
 
 // Static threshold definitions
 #define CPU_THRESHOLD 80
@@ -21,7 +23,16 @@ static void monitorProcesses(void)
 
         if (cpu_usage > CPU_THRESHOLD || mem_usage > MEM_THRESHOLD)
         {
-            printk(KERN_INFO "\nFlagged Anomoly for Process: %s, PID: %d\n", task->comm, task->pid);
+            // Use time stamp to get current time
+            struct timespec64 ts;
+            struct tm tm;
+            ktime_get_real_ts64(&ts);
+            time64_to_tm(ts.tv_sec, 0, &tm);
+            
+            printk(KERN_INFO "[%04ld-%02d-%02d %02d:%02d:%02d] Flagged Anomaly for Process: %s, PID: %d\n",
+                tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+                tm.tm_hour, tm.tm_min, tm.tm_sec,
+                task->comm, task->pid);
 
             // Log all anomalies found for this process
             if (cpu_usage > CPU_THRESHOLD)
