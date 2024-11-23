@@ -50,14 +50,15 @@ make
 # Load module (insure the ko file was generated after the make build first)
 sudo insmod kernel_module.ko
 
-# Check last log to see if the module loaded
-sudo dmesg | tail -1
+# Check to see if the module loaded
+lsmod | grep kernel_module
 
 # Unload module
 sudo rmmod kernel_module
 
 # Check last log to ensure the module unloaded
 sudo dmesg | tail -1
+lsmod | grep kernel_module
 ```
 
 ## Roadmap
