@@ -10,6 +10,9 @@
 #include <linux/fdtable.h>
 #include <linux/socket.h>
 #include <net/sock.h>
+#include <linux/kthread.h>
+#include <linux/delay.h>
+#include <linux/signal.h>
 
 // Static threshold definitions
 #define CPU_THRESHOLD 80  // sec
@@ -17,8 +20,11 @@
 #define NET_SEND_THRESHOLD 10  // MB
 #define NET_REC_THRESHOLD 50  //MB
 
+static struct task_struct *monitor_thread;  // For timed process delays and loop
+
 static void monitorProcesses(void)
 {
+    pr_info("\nEntering monitoring function\n");
     struct task_struct *task; // Set a task struct pointer to use for each process
     bool anomaly_found = false;
 
@@ -99,17 +105,44 @@ static void monitorProcesses(void)
     {
         printk(KERN_INFO "No process anomalies found\n");
     }
+
+    pr_info("\nExiting monitoring function\n");
+}
+
+static int monitor_thread_func(void *data)
+{
+    // While the kernel thread does not need to stop, run monitorProcesses every 30 seconds
+    while (!kthread_should_stop())
+    {
+        monitorProcesses();
+        ssleep(30);
+    }
+
+    return 0;
 }
 
 static int __init anomaly_module_init(void)
 {
-    monitorProcesses();
-    pr_info("Kernel Module Loaded\n");
+    // Create the kthread for monitoring
+    monitor_thread = kthread_run(monitor_thread_func, NULL, "monitor_thread");
+    if (IS_ERR(monitor_thread))
+    {
+        pr_err("Failed to create monitoring thread\n");
+        return PTR_ERR(monitor_thread);
+    }
+
     return 0;
 }
 
 static void __exit anomaly_module_exit(void)
 {
+    // Stop the monitoring thread before unloading the module
+    if (monitor_thread)
+    {
+        kthread_stop(monitor_thread);
+        pr_info("Monitoring thread stopped\n");
+    }
+
     pr_info("Kernel Module Unloaded\n");
 }
 
