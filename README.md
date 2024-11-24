@@ -53,6 +53,9 @@ sudo insmod kernel_module.ko
 # Check to see if the module loaded
 lsmod | grep kernel_module
 
+# Open and view module logs in real time
+sudo dmesg -w | grep "ANOMALY MONITOR"
+
 # Unload module
 sudo rmmod kernel_module
 

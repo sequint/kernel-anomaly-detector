@@ -24,7 +24,7 @@ static struct task_struct *monitor_thread;  // For timed process delays and loop
 
 static void monitorProcesses(void)
 {
-    pr_info("\nEntering monitoring function\n");
+    pr_info("\nANOMALY MONITOR - BEGIN\n");
     struct task_struct *task; // Set a task struct pointer to use for each process
     bool anomaly_found = false;
 
@@ -74,7 +74,7 @@ static void monitorProcesses(void)
             ktime_get_real_ts64(&ts);
             time64_to_tm(ts.tv_sec, 0, &tm);
 
-            printk(KERN_INFO "[%04ld-%02d-%02d %02d:%02d:%02d] Flagged Anomaly for Process: %s, PID: %d\n",
+            printk(KERN_INFO "ANOMALY MONITOR - [%04ld-%02d-%02d %02d:%02d:%02d] Flagged Anomaly for Process: %s, PID: %d\n",
                 tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
                 tm.tm_hour, tm.tm_min, tm.tm_sec,
                 task->comm, task->pid);
@@ -82,19 +82,19 @@ static void monitorProcesses(void)
             // Log all anomalies found for this process
             if (cpu_usage > CPU_THRESHOLD)
             {
-                printk(KERN_INFO "CPU Usage: %lu seconds\n", cpu_usage);
+                printk(KERN_INFO "ANOMALY MONITOR - CPU Usage: %lu seconds\n", cpu_usage);
             }
             if (mem_usage > MEM_THRESHOLD)
             {
-                printk(KERN_INFO "Memory Usage: %lu MB\n", mem_usage);
+                printk(KERN_INFO "ANOMALY MONITOR - Memory Usage: %lu MB\n", mem_usage);
             }
             if (send_bandwidth > NET_SEND_THRESHOLD)
             {
-                printk(KERN_INFO "Network Send Bandwidth: %u MB\n", send_bandwidth);
+                printk(KERN_INFO "ANOMALY MONITOR - Network Send Bandwidth: %u MB\n", send_bandwidth);
             }
             if (rec_bandwidth > NET_REC_THRESHOLD)
             {
-                printk(KERN_INFO "Network Receive Bandwidth: %u MB\n", rec_bandwidth);
+                printk(KERN_INFO "ANOMALY MONITOR - Network Receive Bandwidth: %u MB\n", rec_bandwidth);
             }
 
             anomaly_found = true;
@@ -103,10 +103,10 @@ static void monitorProcesses(void)
 
     if (!anomaly_found)
     {
-        printk(KERN_INFO "No process anomalies found\n");
+        printk(KERN_INFO "ANOMALY MONITOR - No process anomalies found\n");
     }
 
-    pr_info("\nExiting monitoring function\n");
+    pr_info("\nANOMALY MONITOR - END\n");
 }
 
 static int monitor_thread_func(void *data)
