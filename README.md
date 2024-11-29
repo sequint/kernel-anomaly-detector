@@ -56,7 +56,11 @@ lsmod | grep kernel_module
 # Open and view module logs in real time
 sudo dmesg -w | grep "ANOMALY MONITOR"
 
-# Unload module
+# Open and view logs written to log file in terminal or in VS Code
+cat /var/log/anomaly_monitor.log
+code /var/log/anomaly_monitor.log
+
+# Unload module (will up to 30 seconds to unload)
 sudo rmmod kernel_module
 
 # Check last log to ensure the module unloaded
@@ -68,15 +72,15 @@ lsmod | grep kernel_module
 
 This will serve as a static guide of the project roadmap.  GitHub issues will be created to manage each milestone.
 
-1. Set Up the Development Environment and Kernel Module Skeleton
-2. Implement Process Monitoring
-3. Add Anomaly Detection Logic (Using dynamic historical statistics)
-4. Improve Logging and Report Generation
-5. Testing and Threshold Adjustment
+1. ~~Set Up the Development Environment and Kernel Module Skeleton~~
+2. ~~Implement Process Monitoring~~
+3. ~~Add Anomaly Detection Logic (Using dynamic historical statistics)~~
+4. ~~Improve Logging and Report Generation~~
+5. ~~Testing and Threshold Adjustment~~
 
 ### Time Permitted Kernel-ml integration
 
-1. Set Up Basic Machine Learning Model in User Space (C++/Rust/Python)
+1. ~~Set Up Basic Machine Learning Model in User Space (C++/Rust/Python)~~
 2. Integrate User Space Model with Monitoring as a second level
 3. Set Up Kernel-ML model in Kernel Space (Experimental)
 4. Integrate first level anomoly detection, to kernel-ml, to user space model
