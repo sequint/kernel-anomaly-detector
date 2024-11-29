@@ -59,6 +59,12 @@ sudo dmesg -w | grep "ANOMALY MONITOR"
 cat /var/log/anomaly_monitor.log
 code /var/log/anomaly_monitor.log
 
+# Set static thresholds as admin
+echo "200 200 200 200" | sudo tee /sys/kernel/anomaly_module/thresholds
+
+# Remove static thresholds as admin
+echo "1" | sudo tee /sys/kernel/anomaly_module/reset_thresholds
+
 # Unload module (will up to 30 seconds to unload)
 sudo rmmod kernel_module
 
