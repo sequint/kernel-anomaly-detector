@@ -47,7 +47,8 @@ static void log_to_file(const char *message)
     int ret;
 
     file = filp_open(LOG_FILE, O_WRONLY | O_CREAT | O_APPEND, 0644);
-    if (IS_ERR(file)) {
+    if (IS_ERR(file))
+    {
         pr_err("ANOMALY MONITOR - Failed to open log file: %ld\n", PTR_ERR(file));
         return;
     }
@@ -55,7 +56,9 @@ static void log_to_file(const char *message)
     /* Write to the file */
     ret = kernel_write(file, message, strlen(message), &pos);
     if (ret < 0)
+    {
         pr_err("ANOMALY MONITOR - Failed to write to log file: %d\n", ret);
+    }
 
     filp_close(file, NULL);
 }
@@ -147,18 +150,24 @@ static void monitorProcesses(void)
         unsigned long mem_usage = (task->mm) ? get_mm_rss(task->mm) * PAGE_SIZE / 1024 : 0;
         unsigned int send_bandwidth = 0, rec_bandwidth = 0;
 
+        // Read lock to prevent race conditions for network socket reads
         rcu_read_lock();
         struct files_struct *files = task->files;
-        if (files) {
+        if (files)
+        {
             struct fdtable *fdt = files_fdtable(files);
             if (fdt) {
-                for (int fd = 0; fd < fdt->max_fds; fd++) {
+                for (int fd = 0; fd < fdt->max_fds; fd++)
+                {
                     struct file *file = fdt->fd[fd];
                     if (!file || !S_ISSOCK(file->f_path.dentry->d_inode->i_mode))
+                    {
                         continue;
+                    }
 
                     struct socket *sock = (struct socket *)file->private_data;
-                    if (sock && sock->sk) {
+                    if (sock && sock->sk)
+                    {
                         struct sock *sk = sock->sk;
                         send_bandwidth += sk->sk_wmem_queued / (1024 * 1024);
                         rec_bandwidth += sk->sk_rmem_alloc.counter / (1024 * 1024);
@@ -213,7 +222,8 @@ static void monitorProcesses(void)
 
 static int monitor_thread_func(void *data)
 {
-    while (!kthread_should_stop()) {
+    while (!kthread_should_stop())
+    {
         monitorProcesses();
         ssleep(30);
     }
@@ -224,7 +234,9 @@ static int __init anomaly_module_init(void)
 {
     anomaly_kobj = kobject_create_and_add("anomaly_module", kernel_kobj);
     if (!anomaly_kobj)
+    {
         return -ENOMEM;
+    }
 
     if (sysfs_create_file(anomaly_kobj, &thresholds_attr.attr))
     {
@@ -238,7 +250,8 @@ static int __init anomaly_module_init(void)
     }
 
     monitor_thread = kthread_run(monitor_thread_func, NULL, "monitor_thread");
-    if (IS_ERR(monitor_thread)) {
+    if (IS_ERR(monitor_thread))
+    {
         kobject_put(anomaly_kobj);
         return PTR_ERR(monitor_thread);
     }
@@ -250,7 +263,9 @@ static int __init anomaly_module_init(void)
 static void __exit anomaly_module_exit(void)
 {
     if (monitor_thread)
+    {
         kthread_stop(monitor_thread);
+    }
 
     kobject_put(anomaly_kobj);
     pr_info("ANOMALY MONITOR - Module Unloaded\n");
