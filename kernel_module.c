@@ -21,15 +21,20 @@
 
 #define LOG_FILE "/var/log/anomaly_monitor.log"
 
+// Default threshold values
 static unsigned long CPU_THRESHOLD = 80;      // sec
 static unsigned long MEM_THRESHOLD = 100 * 1024; // MB
 static unsigned int NET_SEND_THRESHOLD = 10;  // MB
 static unsigned int NET_REC_THRESHOLD = 50;   // MB
 
+// Variable threshold values
+static unsigned long total_cpu_threshold = 0;
+static unsigned long total_mem_threshold = 0;
+static unsigned long total_net_send_threshold = 0;
+static unsigned long total_net_rec_threshold = 0;
+static unsigned int update_count = 0;
+
 static struct task_struct *monitor_thread;
-static struct kobject *anomaly_kobj;
-
-
 
 static void log_to_file(const char *message)
 {
@@ -51,17 +56,33 @@ static void log_to_file(const char *message)
     filp_close(file, NULL);
 }
 
-
-// Sysfs write handler
-static ssize_t set_thresholds(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
+// Updates threshold values based on mean at every iteration
+static void update_thresholds(unsigned long new_cpu, unsigned long new_mem, unsigned int new_send, unsigned int new_rec)
 {
-    sscanf(buf, "%lu %lu %u %u", &CPU_THRESHOLD, &MEM_THRESHOLD, &NET_SEND_THRESHOLD, &NET_REC_THRESHOLD);
-    pr_info("ANOMALY MONITOR - Updated Thresholds: CPU=%lu, MEM=%lu, SEND=%u, RECV=%u\n",
-            CPU_THRESHOLD, MEM_THRESHOLD, NET_SEND_THRESHOLD, NET_REC_THRESHOLD);
-    return count;
-}
+    // If this is the first process run, set inititial thresholds to current values
+    if (update_count == 0)
+    {
+        CPU_THRESHOLD = new_cpu;
+        MEM_THRESHOLD = new_mem;
+        NET_SEND_THRESHOLD = new_send;
+        NET_REC_THRESHOLD = new_rec;
+    }
+    // Otherwise sum the thresholds running total and update thresholds to their mean values
+    else
+    {
+        total_cpu_threshold += new_cpu;
+        total_mem_threshold += new_mem;
+        total_net_send_threshold += new_send;
+        total_net_rec_threshold += new_rec;
 
-static struct kobj_attribute thresholds_attr = __ATTR(thresholds, 0220, NULL, set_thresholds);
+        CPU_THRESHOLD = total_cpu_threshold / update_count;
+        MEM_THRESHOLD = total_mem_threshold / update_count;
+        NET_SEND_THRESHOLD = total_net_send_threshold / update_count;
+        NET_REC_THRESHOLD = total_net_rec_threshold / update_count;
+    }
+
+    update_count++;
+}
 
 static void monitorProcesses(void)
 {
@@ -77,18 +98,25 @@ static void monitorProcesses(void)
         unsigned long mem_usage = (task->mm) ? get_mm_rss(task->mm) * PAGE_SIZE / 1024 : 0;
         unsigned int send_bandwidth = 0, rec_bandwidth = 0;
 
+        // Lock read while traversing through process sockets to avoid race conditions
         rcu_read_lock();
         struct files_struct *files = task->files;
-        if (files) {
+        if (files)
+        {
             struct fdtable *fdt = files_fdtable(files);
-            if (fdt) {
-                for (int fd = 0; fd < fdt->max_fds; fd++) {
+            if (fdt)
+            {
+                for (int fd = 0; fd < fdt->max_fds; fd++)
+                {
                     struct file *file = fdt->fd[fd];
                     if (!file || !S_ISSOCK(file->f_path.dentry->d_inode->i_mode))
+                    {
                         continue;
+                    }
 
                     struct socket *sock = (struct socket *)file->private_data;
-                    if (sock && sock->sk) {
+                    if (sock && sock->sk)
+                    {
                         struct sock *sk = sock->sk;
                         send_bandwidth += sk->sk_wmem_queued / (1024 * 1024);
                         rec_bandwidth += sk->sk_rmem_alloc.counter / (1024 * 1024);
@@ -106,19 +134,25 @@ static void monitorProcesses(void)
             ktime_get_real_ts64(&ts);
             time64_to_tm(ts.tv_sec, 0, &tm);
 
+            // Create anomaly log message, then log to file and print the log
             snprintf(log_message, sizeof(log_message),
                      "[%04ld-%02d-%02d %02d:%02d:%02d] PID:%d COMM:%s CPU:%lu MEM:%lu SEND:%u RECV:%u\n",
                      tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
                      task->pid, task->comm, cpu_usage, mem_usage, send_bandwidth, rec_bandwidth);
-
             log_to_file(log_message);
             pr_info("%s", log_message);
+
             anomaly_found = true;
         }
+
+        // Update global thresholds based on each process
+        update_thresholds(cpu_usage, mem_usage, send_bandwidth, rec_bandwidth);
     }
 
     if (!anomaly_found)
+    {
         pr_info("ANOMALY MONITOR - No anomalies detected\n");
+    }
 
     pr_info("ANOMALY MONITOR - END\n");
 }
@@ -134,18 +168,9 @@ static int monitor_thread_func(void *data)
 
 static int __init anomaly_module_init(void)
 {
-    anomaly_kobj = kobject_create_and_add("anomaly_module", kernel_kobj);
-    if (!anomaly_kobj)
-        return -ENOMEM;
-
-    if (sysfs_create_file(anomaly_kobj, &thresholds_attr.attr)) {
-        kobject_put(anomaly_kobj);
-        return -ENOMEM;
-    }
-
     monitor_thread = kthread_run(monitor_thread_func, NULL, "monitor_thread");
-    if (IS_ERR(monitor_thread)) {
-        kobject_put(anomaly_kobj);
+    if (IS_ERR(monitor_thread))
+    {
         return PTR_ERR(monitor_thread);
     }
 
@@ -156,9 +181,10 @@ static int __init anomaly_module_init(void)
 static void __exit anomaly_module_exit(void)
 {
     if (monitor_thread)
+    {
         kthread_stop(monitor_thread);
+    }
 
-    kobject_put(anomaly_kobj);
     pr_info("ANOMALY MONITOR - Module Unloaded\n");
 }
 
