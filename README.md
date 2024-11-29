@@ -2,8 +2,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 ![Issues](https://img.shields.io/github/issues/sequint/kernel-anomaly-detector)
-![Contributors](https://img.shields.io/github/contributors/sequint/kernel-anomaly-detector)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-2.1.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Linux-brightgreen)
 ![Kernel Development](https://img.shields.io/badge/Kernel%20Development-Linux%20Kernel-brightgreen)
 
