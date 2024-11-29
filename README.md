@@ -11,12 +11,12 @@
 - [About](#About)
 - [Installation](#Installation)
 - [Build](#Build)
-- [Roadmap](#Roadmap)
+- [Future Goals](#Future)
 - [Authors](#Authors)
 
 ## About
 
-A kernel module for monitoring system processes and detecting anomalies as potential malware threats based on CPU and memory usage.
+A kernel module for monitoring system processes and detecting anomalies as potential malware threats based on CPU, memory, & network usage.
 
 ## Installation
 
@@ -67,20 +67,9 @@ sudo dmesg | tail -1
 lsmod | grep kernel_module
 ```
 
-## Roadmap
+## Future Goals
 
-This will serve as a static guide of the project roadmap.  GitHub issues will be created to manage each milestone.
-
-1. ~~Set Up the Development Environment and Kernel Module Skeleton~~
-2. ~~Implement Process Monitoring~~
-3. ~~Add Anomaly Detection Logic (Using dynamic historical statistics)~~
-4. ~~Improve Logging and Report Generation~~
-5. ~~Testing and Threshold Adjustment~~
-
-### Time Permitted Kernel-ml integration
-
-1. ~~Set Up Basic Machine Learning Model in User Space (C++/Rust/Python)~~
-2. Integrate User Space Model with Monitoring as a second level
+1. Integrate User Space ML Model with Monitoring as a second level
 3. Set Up Kernel-ML model in Kernel Space (Experimental)
 4. Integrate first level anomoly detection, to kernel-ml, to user space model
 5. Extensive Testing and ML Benchmarking
