@@ -75,10 +75,12 @@ static void monitorProcesses(void)
     unsigned int total_send_bandwidth = 0, total_rec_bandwidth = 0;
     unsigned int processes_tracked = 0;
 
-    pr_info("ANOMALY MONITOR - BEGIN\n");
+    pr_info("ANOMALY DETECTOR - BEGIN\n");
+
 
     for_each_process(task)
     {
+        // unsigned long runtime = task->se.sum_exec_runtime;
         unsigned long cpu_usage = (task->utime + task->stime) / HZ;
         unsigned long mem_usage = (task->mm) ? get_mm_rss(task->mm) * PAGE_SIZE / 1024 : 0;
         unsigned int send_bandwidth = 0, rec_bandwidth = 0;
@@ -119,7 +121,7 @@ static void monitorProcesses(void)
             time64_to_tm(ts.tv_sec, 0, &tm);
 
             snprintf(log_message, sizeof(log_message),
-                     "[%04ld-%02d-%02d %02d:%02d:%02d] PID:%d COMM:%s CPU:%lu MEM:%lu SEND:%u RECV:%u\n",
+                     "ANOMALY DETECTOR - [%04ld-%02d-%02d %02d:%02d:%02d] PID:%d COMM:%s CPU:%lu MEM:%lu SEND:%u RECV:%u\n",
                      tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
                      task->pid, task->comm, cpu_usage, mem_usage, send_bandwidth, rec_bandwidth);
             pr_info("%s", log_message);
@@ -144,9 +146,9 @@ static void monitorProcesses(void)
     update_thresholds(ave_cpu_usage, ave_mem_usage, ave_send_bandwidth, ave_rec_bandwidth);
 
     if (!anomaly_found)
-        pr_info("ANOMALY MONITOR - No anomalies detected\n");
+        pr_info("ANOMALY DETECTOR - No anomalies detected\n");
 
-    pr_info("ANOMALY MONITOR - END\n");
+    pr_info("ANOMALY DETECTOR - END\n");
 }
 
 static int monitor_thread_func(void *data)
@@ -167,7 +169,7 @@ static int __init anomaly_module_init(void)
         return PTR_ERR(monitor_thread);
     }
 
-    pr_info("ANOMALY MONITOR - Module Loaded\n");
+    pr_info("ANOMALY DETECTOR - Module Loaded\n");
     return 0;
 }
 
@@ -178,7 +180,7 @@ static void __exit anomaly_module_exit(void)
         kthread_stop(monitor_thread);
     }
     
-    pr_info("ANOMALY MONITOR - Module Unloaded\n");
+    pr_info("ANOMALY DETECTOR - Module Unloaded\n");
 }
 
 module_init(anomaly_module_init);

@@ -53,7 +53,7 @@ sudo insmod kernel_module.ko
 lsmod | grep kernel_module
 
 # Open and view module logs in real time
-sudo dmesg -w | grep "ANOMALY MONITOR"
+sudo dmesg -w | grep "ANOMALY DETECTOR"
 
 # Open and view logs written to log file in terminal or in VS Code
 cat /var/log/anomaly_monitor.log
