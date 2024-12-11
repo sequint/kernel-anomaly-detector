@@ -36,66 +36,6 @@ static unsigned int total_runs = 0;
 static DEFINE_MUTEX(threshold_mutex); // Mutex lock for threshold values
 
 static struct task_struct *monitor_thread;
-static struct kobject *anomaly_kobj;
-
-static unsigned int manual_thresholds = 0; // Flag for whether system admin is setting static thresholds
-
-static void log_to_file(const char *message)
-{
-    struct file *file;
-    loff_t pos = 0;
-    int ret;
-
-    file = filp_open(LOG_FILE, O_WRONLY | O_CREAT | O_APPEND, 0644);
-    if (IS_ERR(file))
-    {
-        pr_err("ANOMALY MONITOR - Failed to open log file: %ld\n", PTR_ERR(file));
-        return;
-    }
-
-    /* Write to the file */
-    ret = kernel_write(file, message, strlen(message), &pos);
-    if (ret < 0)
-    {
-        pr_err("ANOMALY MONITOR - Failed to write to log file: %d\n", ret);
-    }
-
-    filp_close(file, NULL);
-}
-
-
-// Sysfs write handler
-static ssize_t set_thresholds(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
-{
-    // Aquire threshold lock before updating thresholds as admin
-    mutex_lock(&threshold_mutex);
-
-    sscanf(buf, "%lu %lu %u %u", &CPU_THRESHOLD, &MEM_THRESHOLD, &NET_SEND_THRESHOLD, &NET_REC_THRESHOLD);
-    pr_info("ANOMALY MONITOR - Updated Thresholds: CPU=%lu, MEM=%lu, SEND=%u, RECV=%u\n",
-            CPU_THRESHOLD, MEM_THRESHOLD, NET_SEND_THRESHOLD, NET_REC_THRESHOLD);
-    
-    manual_thresholds = 1;
-
-    mutex_unlock(&threshold_mutex);
-
-    return count;
-}
-
-static struct kobj_attribute thresholds_attr = __ATTR(thresholds, 0220, NULL, set_thresholds);
-
-// Sysfs write handler for reset
-static ssize_t reset_thresholds(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
-{
-    mutex_lock(&threshold_mutex);
-    manual_thresholds = 0;
-    mutex_unlock(&threshold_mutex);
-
-    pr_info("ANOMALY MONITOR - Thresholds will now be updated automatically.\n");
-
-    return count;
-}
-
-static struct kobj_attribute reset_thresholds_attr = __ATTR(reset_thresholds, 0200, NULL, reset_thresholds);
 
 // Updates threshold values based on mean at every iteration
 static void update_thresholds(unsigned long new_cpu, unsigned long new_mem, unsigned int new_send, unsigned int new_rec)
@@ -208,11 +148,8 @@ static void monitorProcesses(void)
     unsigned int ave_send_bandwidth = total_send_bandwidth / processes_tracked;
     unsigned int ave_rec_bandwidth = total_rec_bandwidth / processes_tracked;
 
-    if (!manual_thresholds)
-    {
-        // Update global thresholds based on each process
-        update_thresholds(ave_cpu_usage, ave_mem_usage, ave_send_bandwidth, ave_rec_bandwidth);
-    }
+    // Update global thresholds based on each process
+    update_thresholds(ave_cpu_usage, ave_mem_usage, ave_send_bandwidth, ave_rec_bandwidth);
 
     if (!anomaly_found)
         pr_info("ANOMALY MONITOR - No anomalies detected\n");
@@ -232,27 +169,9 @@ static int monitor_thread_func(void *data)
 
 static int __init anomaly_module_init(void)
 {
-    anomaly_kobj = kobject_create_and_add("anomaly_module", kernel_kobj);
-    if (!anomaly_kobj)
-    {
-        return -ENOMEM;
-    }
-
-    if (sysfs_create_file(anomaly_kobj, &thresholds_attr.attr))
-    {
-        kobject_put(anomaly_kobj);
-        return -ENOMEM;
-    }
-    if (sysfs_create_file(anomaly_kobj, &reset_thresholds_attr.attr))
-    {
-        kobject_put(anomaly_kobj);
-        return -ENOMEM;
-    }
-
     monitor_thread = kthread_run(monitor_thread_func, NULL, "monitor_thread");
     if (IS_ERR(monitor_thread))
     {
-        kobject_put(anomaly_kobj);
         return PTR_ERR(monitor_thread);
     }
 
@@ -266,8 +185,7 @@ static void __exit anomaly_module_exit(void)
     {
         kthread_stop(monitor_thread);
     }
-
-    kobject_put(anomaly_kobj);
+    
     pr_info("ANOMALY MONITOR - Module Unloaded\n");
 }
 
