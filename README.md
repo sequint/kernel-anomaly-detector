@@ -75,10 +75,9 @@ lsmod | grep kernel_module
 
 ## Future Goals
 
-1. Integrate User Space ML Model with Monitoring as a second level
-3. Set Up Kernel-ML model in Kernel Space (Experimental)
-4. Integrate first level anomoly detection, to kernel-ml, to user space model
-5. Extensive Testing and ML Benchmarking
+1. Set Up Kernel-ML model in Kernel Space
+2. Integrate first level anomoly detection to kernel-ml
+3. Extensive Testing and ML Benchmarking
 
 ## Authors
 
