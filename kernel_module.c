@@ -2,22 +2,15 @@
 #include <linux/printk.h>
 #include <linux/sched.h>
 #include <linux/init.h>
-#include <linux/seq_file.h>
 #include <linux/mm.h>
 #include <linux/ktime.h>
 #include <linux/timekeeping.h>
 #include <linux/net.h>
 #include <linux/fdtable.h>
-#include <linux/socket.h>
 #include <net/sock.h>
 #include <linux/kthread.h>
 #include <linux/delay.h>
-#include <linux/signal.h>
-#include <linux/sysfs.h>
-#include <linux/kobject.h>
 #include <linux/fs.h>
-#include <linux/uaccess.h>
-#include <linux/slab.h>
 
 #define LOG_FILE "/var/log/anomaly_monitor.log"
 
@@ -129,9 +122,8 @@ static void monitorProcesses(void)
                      "[%04ld-%02d-%02d %02d:%02d:%02d] PID:%d COMM:%s CPU:%lu MEM:%lu SEND:%u RECV:%u\n",
                      tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
                      task->pid, task->comm, cpu_usage, mem_usage, send_bandwidth, rec_bandwidth);
-
-            log_to_file(log_message);
             pr_info("%s", log_message);
+            
             anomaly_found = true;
         }
 
