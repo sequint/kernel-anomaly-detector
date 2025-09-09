@@ -52,6 +52,11 @@ cd ~/module_dir_path
 # Compile the kernel module
 make
 
+# If running on Safe Mode in a Linux OS, create a kernel key, then sign it using the below script
+sudo /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 \
+  ~/kernel-keys/MOK.priv ~/kernel-keys/MOK.der kernel_module.ko
+
+
 # Load module (insure the ko file was generated after the make build first)
 sudo insmod kernel_module.ko
 

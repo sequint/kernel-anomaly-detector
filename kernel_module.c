@@ -186,7 +186,7 @@ static void monitorProcesses(void)
             time64_to_tm(ts.tv_sec, 0, &tm);
 
             snprintf(log_message, sizeof(log_message),
-                     "[%04ld-%02d-%02d %02d:%02d:%02d] PID:%d COMM:%s CPU:%lu MEM:%lu SEND:%u RECV:%u\n",
+                     "ANOMALY MONITOR - [%04ld-%02d-%02d %02d:%02d:%02d] PID:%d COMM:%s CPU:%lu MEM:%lu SEND:%u RECV:%u\n",
                      tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
                      task->pid, task->comm, cpu_usage, mem_usage, send_bandwidth, rec_bandwidth);
 
@@ -217,6 +217,9 @@ static void monitorProcesses(void)
     if (!anomaly_found)
         pr_info("ANOMALY MONITOR - No anomalies detected\n");
 
+    // Print total anomalies found for running visual of historical updates
+    pr_info("ANOMALY MONITOR - Anomalies Detected: %d\n", processes_tracked);
+    
     pr_info("ANOMALY MONITOR - END\n");
 }
 
