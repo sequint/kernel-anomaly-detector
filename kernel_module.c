@@ -141,6 +141,7 @@ static void monitorProcesses(void)
     unsigned long total_mem_usage = 0;
     unsigned int total_send_bandwidth = 0, total_rec_bandwidth = 0;
     unsigned int processes_tracked = 0;
+    unsigned int num_anomalies = 0;
 
     pr_info("ANOMALY MONITOR - BEGIN\n");
 
@@ -193,6 +194,7 @@ static void monitorProcesses(void)
             log_to_file(log_message);
             pr_info("%s", log_message);
             anomaly_found = true;
+            num_anomalies++;
         }
 
         processes_tracked++;
@@ -203,8 +205,8 @@ static void monitorProcesses(void)
     }
 
     // Calc averages to use for update
-    unsigned long ave_cpu_usage = total_cpu_threshold / processes_tracked;
-    unsigned long ave_mem_usage = total_mem_threshold / processes_tracked;
+    unsigned long ave_cpu_usage = total_cpu_usage / processes_tracked;
+    unsigned long ave_mem_usage = total_mem_usage / processes_tracked;
     unsigned int ave_send_bandwidth = total_send_bandwidth / processes_tracked;
     unsigned int ave_rec_bandwidth = total_rec_bandwidth / processes_tracked;
 
@@ -218,8 +220,8 @@ static void monitorProcesses(void)
         pr_info("ANOMALY MONITOR - No anomalies detected\n");
 
     // Print total anomalies found for running visual of historical updates
-    pr_info("ANOMALY MONITOR - Anomalies Detected: %d\n", processes_tracked);
-    
+    pr_info("ANOMALY MONITOR - Anomalies Detected: %d\n", num_anomalies);
+
     pr_info("ANOMALY MONITOR - END\n");
 }
 
